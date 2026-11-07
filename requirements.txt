@@ -1,1 +1,14 @@
-# Agrega aquí las dependencias Python del proyecto.
+# Análisis de datos y visualización
+numpy
+pandas
+matplotlib
+seaborn
+
+# Modelado y notebooks
+scikit-learn
+jupyter
+torch
+
+# Extensión opcional con Transformers
+transformers
+datasets
