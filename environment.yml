@@ -1,0 +1,36 @@
+
+name: goemotions_env
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  # Manipulación de datos y EDA
+  - pandas>=2.0.0
+  - numpy>=1.24.0
+  - scikit-learn>=1.2.0
+  
+  # Procesamiento de Lenguaje Natural (NLP)
+  - nltk>=3.8.1
+  - spacy>=3.5.0
+  
+  # Deep Learning (Dense NN, vanilla RNN, LSTM)
+  - pytorch>=2.0.0
+  - torchvision
+  - torchaudio
+  
+  # Visualización de datos y entorno Jupyter
+  - matplotlib>=3.7.0
+  - seaborn>=0.12.0
+  - wordcloud>=1.9.0
+  - jupyter
+  - notebook
+  - tqdm>=4.65.0
+  
+  # Paquetes de PyPI (Hugging Face Transformers y datasets)
+  - pip:
+    - transformers>=4.30.0
+    - datasets>=2.12.0
+    - accelerate>=0.20.0
