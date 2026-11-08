@@ -9,8 +9,11 @@ Transformers.
 
 ## Integrantes
 
-Pendiente de completar.
-
+Sarah Rodriguez A00411232
+Maria Camila Salamanca A00411234
+Nicholas Solis A0041--05
+Santiago Cabal A00
+Heidy Hernandez A00411232
 ## Requisitos e instrucciones
 
 Se recomienda Python 3.10 o posterior. Instala las dependencias del proyecto
