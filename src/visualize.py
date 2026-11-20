@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 FIG_DIR = Path(__file__).resolve().parents[1] / "outputs" / "figures"
 COLORS = {"negative": "#e76f51", "positive": "#2a9d8f"}
@@ -52,6 +53,19 @@ def plot_top_words(df, text_col="clean", k=15, name="eda_top_words.png"):
         top = pd.DataFrame(words.most_common(k), columns=["palabra", "frecuencia"])
         sns.barplot(data=top, x="frecuencia", y="palabra", color=COLORS[g], ax=ax)
         ax.set_title(f"Top {k} palabras: {g}")
+    fig.tight_layout()
+    _save(fig, name)
+    return fig
+
+def plot_confusion_matrix(y_true, y_pred, title="Matriz de confusión", name="confusion_matrix.png"):
+    """Matriz de confusión (filas = real, columnas = predicho). Guarda la figura en outputs/figures/."""
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    fig, ax = plt.subplots(figsize=(4, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
+                xticklabels=ORDER, yticklabels=ORDER, ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel("Predicho")
+    ax.set_ylabel("Real")
     fig.tight_layout()
     _save(fig, name)
     return fig
