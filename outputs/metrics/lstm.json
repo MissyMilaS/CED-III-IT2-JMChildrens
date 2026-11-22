@@ -1,0 +1,35 @@
+{
+  "model": "lstm",
+  "accuracy": 0.628,
+  "precision": 0.6225,
+  "recall": 0.704,
+  "f1": 0.6553,
+  "kappa": 0.256,
+  "confusion_matrix": [
+    [
+      55.2,
+      44.8
+    ],
+    [
+      29.6,
+      70.4
+    ]
+  ],
+  "std": {
+    "accuracy": 0.0547,
+    "precision": 0.0572,
+    "recall": 0.0695,
+    "f1": 0.0183,
+    "kappa": 0.1095
+  },
+  "n_seeds": 5,
+  "params": {
+    "emb_dim": 64,
+    "dropout": 0.5,
+    "hidden": 32,
+    "batch_size": 32,
+    "lr": 0.003
+  },
+  "n_params": 154529,
+  "train_seconds_per_run": 1.5
+}

@@ -26,3 +26,7 @@ preprocesados y los resultados se guardan en las carpetas correspondientes.
 
 Las dependencias, rutas de datos y comandos de ejecución específicos se
 documentarán al implementarse el flujo de trabajo.
+
+Instalen esto: (En la terminal) pip install pandas scikit-learn nltk matplotlib seaborn 
+python -m pip install pandas scikit-learn nltk matplotlib seaborn
+python -m pip install seaborn matplotlib
