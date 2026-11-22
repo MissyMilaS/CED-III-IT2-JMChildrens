@@ -1,0 +1,4 @@
+variant,avg_length,total_tokens,vocab_size
+Original (split on whitespace),13.18,13183,4205
+"Tokenized, with stopwords",13.21,13206,3010
+"Tokenized, without stopwords",7.16,7161,2873

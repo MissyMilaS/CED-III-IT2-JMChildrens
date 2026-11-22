@@ -5,57 +5,59 @@ Flujo:
   2. grid_search()      -> CV estratificada SOLO sobre train (el test no se toca)
   3. final_runs()       -> entrena con varias semillas, evalúa UNA vez en test y guarda JSON
 """
-import json
-import random
-import time
-from collections import Counter
-from datetime import datetime
-from itertools import product
-from pathlib import Path
+import json  # para guardar/leer métricas en formato JSON
+import random  # generador aleatorio de Python (se fija para reproducibilidad)
+import time  # para medir cuántos segundos tarda cada entrenamiento
+from collections import Counter  # cuenta cuántas veces aparece cada palabra
+from datetime import datetime  # fecha y hora para el log
+from itertools import product  # producto cartesiano: todas las combinaciones del grid
+from pathlib import Path  # manejo de rutas de archivos independiente del sistema operativo
 
-import numpy as np
-import pandas as pd
-import torch
-from sklearn.model_selection import StratifiedKFold, train_test_split
-from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
+import numpy as np  # arreglos numéricos
+import pandas as pd  # tablas (DataFrame) y lectura de CSV
+import torch  # deep learning
+from sklearn.model_selection import StratifiedKFold, train_test_split  # CV estratificada y split estratificado
+from torch import nn  # capas y funciones de pérdida
+from torch.utils.data import DataLoader, TensorDataset  # para armar lotes (batches) de entrenamiento
 
-from src.evaluate import METRICS_DIR, compute_metrics
-from src.models import PAD, UNK, build_model, count_params
+from src.evaluate import METRICS_DIR, compute_metrics  # métricas del equipo (accuracy, precision, recall, f1, kappa)
+from src.models import PAD, UNK, build_model, count_params  # arquitecturas y constantes de vocabulario
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data" / "processed"
-MODELS_DIR = ROOT / "outputs" / "saved_models"
-LOG_FILE = ROOT / "logs" / "training_logs.txt"
+ROOT = Path(__file__).resolve().parents[1]  # carpeta raíz del repo (dos niveles arriba de este archivo)
+DATA_DIR = ROOT / "data" / "processed"  # donde están train.csv y test.csv
+MODELS_DIR = ROOT / "outputs" / "saved_models"  # donde se guardan los pesos entrenados
+LOG_FILE = ROOT / "logs" / "training_logs.txt"  # archivo de log de entrenamiento
 
-SEED = 77767
-MAX_LEN = 30            # los comentarios tienen como máximo 30 tokens
-MAX_VOCAB = 5000
-MODEL_NAMES = ["dense", "vanilla_rnn", "lstm"]
+SEED = 777  # semilla base para reproducibilidad
+MAX_LEN = 30  # los comentarios tienen como máximo 30 tokens
+MAX_VOCAB = 5000  # tamaño máximo del vocabulario (incluye <pad> y <unk>)
+MODEL_NAMES = ["dense", "vanilla_rnn", "lstm"]  # los 3 modelos que pide el enunciado
+EXTRA_MODEL_NAMES = ["bilstm"]  # modelo extra del equipo: LSTM bidireccional
+ALL_MODEL_NAMES = MODEL_NAMES + EXTRA_MODEL_NAMES  # todos los modelos neuronales de esta parte
 
 # Hiperparámetros explorados (epochs se decide con early stopping)
-GRID = {"hidden": [32, 64, 128], "batch_size": [16, 32, 64], "lr": [1e-3, 3e-3]}
-FIXED = {"emb_dim": 64, "dropout": 0.5}
+GRID = {"hidden": [32, 64, 128], "batch_size": [16, 32, 64], "lr": [1e-3, 3e-3]}  # valores a probar en el grid
+FIXED = {"emb_dim": 64, "dropout": 0.5}  # hiperparámetros que no se exploran
 
 
 # ----------------------------------------------------------------- utilidades
-def set_seed(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
+def set_seed(seed):  # fija todas las semillas para que los resultados se puedan repetir
+    random.seed(seed)  # semilla del módulo random
+    np.random.seed(seed)  # semilla de numpy
+    torch.manual_seed(seed)  # semilla de torch (inicialización de pesos, dropout)
 
 
-def log(msg):
+def log(msg):  # imprime un mensaje y lo guarda en el archivo de log
     """Imprime y agrega la línea a logs/training_logs.txt."""
-    line = f"[{datetime.now():%Y-%m-%d %H:%M:%S}] {msg}"
-    print(line)
-    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(line + "\n")
+    line = f"[{datetime.now():%Y-%m-%d %H:%M:%S}] {msg}"  # antepone fecha y hora al mensaje
+    print(line)  # lo muestra en pantalla/notebook
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)  # crea la carpeta logs/ si no existe
+    with open(LOG_FILE, "a", encoding="utf-8") as f:  # abre el log en modo "agregar"
+        f.write(line + "\n")  # escribe la línea al final del archivo
 
 
 # ----------------------------------------------------------------- datos
-def load_tokens(text_mode="clean"):
+def load_tokens(text_mode="clean"):  # lee los CSV y devuelve los comentarios como listas de tokens
     """Lee train.csv / test.csv ya generados por el equipo (mismo split para todos).
 
     text_mode='clean': usa la columna `clean` (sin stopwords, como el pipeline del equipo).

@@ -1,3 +1,4 @@
+"""Definición de arquitecturas Dense, RNN, LSTM y Transformer."""
 """Definición de arquitecturas para clasificación de sentimiento (PyTorch).
 
 Contiene: DenseNet, RecurrentNet (RNN vanilla, LSTM y LSTM bidireccional) y build_model.
