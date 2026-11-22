@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 pandas>=2.0.0
 numpy>=1.24.0
 scikit-learn>=1.2.0
@@ -13,7 +12,6 @@ transformers>=4.30.0
 datasets>=2.12.0
 accelerate>=0.20.0
 wordcloud>=1.9.2
-=======
 # Análisis de datos y visualización
 numpy
 pandas
@@ -28,4 +26,3 @@ torch
 # Extensión opcional con Transformers
 transformers
 datasets
->>>>>>> feat_docs
