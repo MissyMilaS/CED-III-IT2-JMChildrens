@@ -92,13 +92,22 @@ def assign_sentiment(df):
 
 
 # Dataset balanceado
+def _pos_neg(df):
+    """Se queda solo con positivos y negativos y agrega text_key (texto normalizado para comparar)."""
+    d = df[df["group"].isin(["positive", "negative"])].copy()    # solo positivos y negativos
+    d["text_key"] = d["text"].str.strip().str.lower()            # texto normalizado para detectar repetidos ("Hi " = "hi")
+    return d
+
+
+def _drop_conflicts(d):
+    """Quita los textos repetidos que aparecen con etiquetas distintas (contradictorios)."""
+    conflict = d.groupby("text_key")["group"].nunique() > 1      # True si el mismo texto aparece con 2 etiquetas
+    return d[~d["text_key"].isin(conflict[conflict].index)]      # ~ = negación: quita esos textos
+
+
 def build_balanced(df, n=500, seed=SEED):
     """Solo positivos y negativos, sin duplicados, n comentarios por clase."""
-    d = df[df["group"].isin(["positive", "negative"])].copy()    # se queda solo con positivos y negativos
-    d["text_key"] = d["text"].str.strip().str.lower()            # texto normalizado para detectar repetidos ("Hi " = "hi")
-    # textos repetidos con etiquetas distintas: se descartan por contradictorios
-    conflict = d.groupby("text_key")["group"].nunique() > 1      # True si el mismo texto aparece con 2 etiquetas
-    d = d[~d["text_key"].isin(conflict[conflict].index)]         # ~ = negación: quita esos textos
+    d = _drop_conflicts(_pos_neg(df))                            # positivos/negativos sin textos contradictorios
     d = d.drop_duplicates("text_key")                            # deja una sola copia de cada texto
 
     pos = d[d["group"] == "positive"].sample(n, random_state=seed)   # muestra aleatoria reproducible de n positivos
@@ -106,6 +115,28 @@ def build_balanced(df, n=500, seed=SEED):
     out = pd.concat([pos, neg]).sample(frac=1, random_state=seed)    # los une y los baraja (frac=1 = todas las filas en otro orden)
     out["label"] = (out["group"] == "positive").astype(int)   # etiqueta numérica para los modelos: 1 = positivo, 0 = negativo
     return out[["text", "group", "label"]].reset_index()      # deja 3 columnas; reset_index vuelve el id una columna normal
+
+
+def filter_funnel(raw, filtered, n=500):
+    """Cuántos comentarios quedan tras cada paso del filtrado (evidencia de calidad de datos)."""
+    d = _pos_neg(filtered)                                       # positivos o negativos de un solo grupo
+    n_pos_neg = len(d)
+    d = _drop_conflicts(d)                                       # sin etiquetas contradictorias
+    n_no_conflict = len(d)
+    d = d.drop_duplicates("text_key")                            # sin textos duplicados
+    steps = [
+        ("Raw rows (one per rater)", len(raw)),
+        ("Unique comments", raw["id"].nunique()),
+        ("With >= 1 emotion agreed by >= 2 raters", len(filtered)),
+        ("Single group: positive or negative only", n_pos_neg),
+        ("After removing conflicting duplicate texts", n_no_conflict),
+        ("After removing duplicate texts", len(d)),
+        (f"Balanced sample ({n} + {n})", 2 * n),
+    ]
+    out = pd.DataFrame(steps, columns=["step", "comments"])
+    out["removed"] = (-out["comments"].diff()).astype("Int64")   # cuántos se pierden respecto al paso anterior
+    out.loc[:1, "removed"] = pd.NA                               # filas -> comentarios únicos no es una pérdida
+    return out
 
 
 # Limpieza de texto
@@ -131,3 +162,42 @@ def split_data(df, test_size=0.2, seed=SEED):
     # stratify=label -> mantiene la proporción 50/50 en ambos conjuntos
     # random_state -> el mismo split para todos los integrantes
     return train_test_split(df, test_size=test_size, stratify=df["label"], random_state=seed)
+
+
+# Calidad de datos y resumen del preprocesamiento
+def data_quality(df, text_col="text", clean_col="clean"):
+    """Chequeos básicos de calidad: nulos, duplicados y textos vacíos."""
+    key = df[text_col].fillna("").str.strip().str.lower()
+    report = {
+        "rows": len(df),
+        "null_cells": int(df.isna().sum().sum()),
+        "duplicated_texts": int(key.duplicated().sum()),
+        "empty_texts": int((key == "").sum()),
+    }
+    if clean_col in df.columns:
+        report["empty_after_cleaning"] = int((df[clean_col].fillna("").str.strip() == "").sum())
+    return pd.Series(report, name="value")
+
+
+def preprocessing_summary(texts):
+    """Compara texto original, tokenizado con stopwords y tokenizado sin stopwords."""
+    texts = list(texts)
+    variants = {
+        "Original (split on whitespace)": [t.split() for t in texts],
+        "Tokenized, with stopwords": [tokenize(t, remove_stopwords=False) for t in texts],
+        "Tokenized, without stopwords": [tokenize(t, remove_stopwords=True) for t in texts],
+    }
+    rows = []
+    for name, docs in variants.items():
+        flat = [w for doc in docs for w in doc]
+        rows.append({"variant": name,
+                     "avg_length": round(len(flat) / len(docs), 2),
+                     "total_tokens": len(flat),
+                     "vocab_size": len(set(flat))})
+    return pd.DataFrame(rows).set_index("variant")
+
+
+def length_percentiles(texts, remove_stopwords=False, qs=(50, 90, 95, 99, 100)):
+    """Percentiles de longitud en tokens; sirve para elegir max_len en RNN/LSTM."""
+    lengths = pd.Series([len(tokenize(t, remove_stopwords)) for t in texts])
+    return pd.Series({f"p{q}": int(lengths.quantile(q / 100)) for q in qs})
