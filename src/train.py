@@ -28,7 +28,7 @@ DATA_DIR = ROOT / "data" / "processed"  # donde están train.csv y test.csv
 MODELS_DIR = ROOT / "outputs" / "saved_models"  # donde se guardan los pesos entrenados
 LOG_FILE = ROOT / "logs" / "training_logs.txt"  # archivo de log de entrenamiento
 
-SEED = 42  # semilla base para reproducibilidad
+SEED = 777  # semilla base para reproducibilidad
 MAX_LEN = 30  # los comentarios tienen como máximo 30 tokens
 MAX_VOCAB = 5000  # tamaño máximo del vocabulario (incluye <pad> y <unk>)
 MODEL_NAMES = ["dense", "vanilla_rnn", "lstm"]  # los 3 modelos que pide el enunciado
@@ -209,7 +209,7 @@ def grid_search(model_name, tok_tr, y_tr, grid=GRID, fixed=FIXED, n_splits=3,
 
 # ----------------------------------------------------------------- evaluación final
 def final_runs(model_name, tok_tr, y_tr, tok_te, y_te, params,
-               seeds=(42, 43, 44, 45, 46), val_size=0.15, save_name=None,
+               seeds=(777, 778, 779, 780, 781), val_size=0.15, save_name=None,
                max_epochs=30, patience=5):  # entrenamiento final con varias semillas y evaluación en test
     """Entrena con varias semillas, evalúa en test UNA vez por semilla y guarda el JSON.
 

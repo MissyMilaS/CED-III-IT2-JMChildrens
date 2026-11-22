@@ -1,0 +1,35 @@
+{
+  "model": "dense",
+  "accuracy": 0.667,
+  "precision": 0.7278,
+  "recall": 0.604,
+  "f1": 0.6425,
+  "kappa": 0.334,
+  "confusion_matrix": [
+    [
+      73.0,
+      27.0
+    ],
+    [
+      39.6,
+      60.4
+    ]
+  ],
+  "std": {
+    "accuracy": 0.0614,
+    "precision": 0.1067,
+    "recall": 0.1297,
+    "f1": 0.0451,
+    "kappa": 0.1227
+  },
+  "n_seeds": 5,
+  "params": {
+    "emb_dim": 64,
+    "dropout": 0.5,
+    "hidden": 32,
+    "batch_size": 64,
+    "lr": 0.003
+  },
+  "n_params": 144065,
+  "train_seconds_per_run": 0.3
+}
