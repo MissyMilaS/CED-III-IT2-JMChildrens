@@ -1,35 +1,35 @@
 {
   "model": "vanilla_rnn_full",
-  "accuracy": 0.557,
-  "precision": 0.5472,
-  "recall": 0.666,
-  "f1": 0.599,
-  "kappa": 0.114,
+  "accuracy": 0.533,
+  "precision": 0.5424,
+  "recall": 0.478,
+  "f1": 0.4824,
+  "kappa": 0.066,
   "confusion_matrix": [
     [
-      44.8,
-      55.2
+      58.8,
+      41.2
     ],
     [
-      33.4,
-      66.6
+      52.2,
+      47.8
     ]
   ],
   "std": {
-    "accuracy": 0.015,
-    "precision": 0.0121,
-    "recall": 0.0677,
-    "f1": 0.0292,
-    "kappa": 0.0301
+    "accuracy": 0.0189,
+    "precision": 0.0216,
+    "recall": 0.1917,
+    "f1": 0.1242,
+    "kappa": 0.0377
   },
   "n_seeds": 5,
   "params": {
     "emb_dim": 64,
     "dropout": 0.5,
-    "hidden": 128,
+    "hidden": 32,
     "batch_size": 16,
-    "lr": 0.003
+    "lr": 0.001
   },
-  "n_params": 175169,
-  "train_seconds_per_run": 1.5
+  "n_params": 153377,
+  "train_seconds_per_run": 3.0
 }

@@ -1,35 +1,35 @@
 {
   "model": "lstm",
-  "accuracy": 0.628,
-  "precision": 0.6225,
-  "recall": 0.704,
-  "f1": 0.6553,
-  "kappa": 0.256,
+  "accuracy": 0.625,
+  "precision": 0.7199,
+  "recall": 0.422,
+  "f1": 0.5191,
+  "kappa": 0.25,
   "confusion_matrix": [
     [
-      55.2,
-      44.8
+      82.8,
+      17.2
     ],
     [
-      29.6,
-      70.4
+      57.8,
+      42.2
     ]
   ],
   "std": {
-    "accuracy": 0.0547,
-    "precision": 0.0572,
-    "recall": 0.0695,
-    "f1": 0.0183,
-    "kappa": 0.1095
+    "accuracy": 0.0428,
+    "precision": 0.0731,
+    "recall": 0.1301,
+    "f1": 0.0914,
+    "kappa": 0.0856
   },
   "n_seeds": 5,
   "params": {
     "emb_dim": 64,
     "dropout": 0.5,
     "hidden": 32,
-    "batch_size": 32,
-    "lr": 0.003
+    "batch_size": 64,
+    "lr": 0.001
   },
-  "n_params": 154529,
-  "train_seconds_per_run": 1.5
+  "n_params": 154337,
+  "train_seconds_per_run": 2.9
 }
