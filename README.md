@@ -9,7 +9,7 @@ Transformers.
 
 ## Integrantes
 
-Pendiente de completar.
+Maria Camima Salamanca A00411232, Nicholas Solís A00411205, Sarah Rodriguez A00411438, Santiago Cabal A0041...., Heidy Yuliana Hernandez Huila A00411232
 
 ## Requisitos e instrucciones
 
