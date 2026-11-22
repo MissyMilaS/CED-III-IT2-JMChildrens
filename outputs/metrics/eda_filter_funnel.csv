@@ -1,0 +1,8 @@
+step,comments,removed
+Raw rows (one per rater),211225,
+Unique comments,58011,
+With >= 1 emotion agreed by >= 2 raters,54263,3748
+Single group: positive or negative only,29237,25026
+After removing conflicting duplicate texts,29234,3
+After removing duplicate texts,29021,213
+Balanced sample (500 + 500),1000,28021
