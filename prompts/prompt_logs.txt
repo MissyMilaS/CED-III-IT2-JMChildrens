@@ -1,1 +1,58 @@
-Registro de uso de IAGen en la actividad.
+================================================================================
+REGISTRO CRONOLÓGICO DE INTERACCIONES Y PROMPTS CON IAGEN (NIVEL 3)
+Tarea Integradora 2 — Computación y Estructuras Discretas III (CED III)
+Estudiante: Nicholas Solís Pinilla (NSP2007)
+================================================================================
+
+[2026-11-22 17:15:10] SESIÓN 1: DIAGNÓSTICO Y PLANIFICACIÓN DE LA TAREA 4
+Prompt:
+"tenemos esta tarea integradora que hacer en el .pdf y a mi me correspondes hacer el ultimo modelo de Transformers, lo quiero hacer basado en el archivo .ipynb que nos mando el profe en clase. Por favor, antes de empezar, actua como un profesor ultra amable y comprensivo que explica todo, y haz un documento de resumen de la estructura del repositorio que tenemos, y que es todo lo correspondiente a la tarea 4 que debo entregar, me gustaria entender como hacer el paso a paso"
+
+Respuesta / Decisión técnica:
+- Generación del documento maestro CONTEXTO_TAREA4_TRANSFORMERS.md con análisis de la estructura del repo, hiperparámetros de DistilBERT (WordPiece, uncased, 6 capas, 12 cabezas, d=768) y rúbrica oficial.
+
+---
+
+[2026-11-22 17:35:42] SESIÓN 1 (CONT.): POLÍTICA DE GIT Y EJECUCIÓN MODULAR
+Prompt:
+"prefiero hacerlo localmente, si, que sean entregas parciales, me parece genial el plan, empecemos desde el inicio, por favor trata de ir mostrandome lo que vamos a hacer antes de cambiar cualquier cosa, y no pushees nada al repo, eso lo hago yo."
+
+Respuesta / Decisión técnica:
+- Configuración estricta de trabajo local en rama Feat/Task4 sin push remoto.
+- Construcción del script src/run_transformer.py y notebook 04_transformer_extension.ipynb.
+
+---
+
+[2026-11-22 20:06:10] SESIÓN 2: AUDITORÍA DE GIT, COMMITS Y SINCRONIZACIÓN DE MÉTRICAS
+Prompt:
+"Hola, por favor lee todo el repositorio, el pdf de la integradora, el contexto y el archivo .ipynb de guia y confirmame si entiendes como seguir con lo que falta, tambien mira mis commits y las ramas del repo en git para saber si hay cambios que tener en cuenta antes de montar algo"
+
+Respuesta / Decisión técnica:
+- Detección de 28 commits de ventaja en origin/dev con los resultados promediados sobre 5 semillas (777-781) de Camila para redes neuronales (Dense, Vanilla RNN, LSTM, BiLSTM).
+- Detección de divergencias en comparison.csv y estado incompleto del borrador Report.docx.
+- Identificación de la regla obligatoria de 10 commits espaciados por 1 hora.
+
+---
+
+[2026-11-22 20:13:36] SESIÓN 2 (CONT.): PREPARACIÓN DEL COMMIT #4
+Prompt:
+"si por favor, continua con la explicacion"
+
+Respuesta / Decisión técnica:
+- Sincronización de métricas en outputs/metrics/comparison.csv.
+- Regeneración de outputs/figures/all_models_metrics_comparison.png con matplotlib y seaborn.
+- Registro en logs/experiment_notes.md y preparación del Commit #4.
+
+---
+
+[2026-11-22 20:19:21] SESIÓN 2 (CONT.): MODULARIZACIÓN EN SRC/ Y REGLA DE EXCLUSIÓN DE DOCS
+Prompt:
+"siguiente paso por favor, no incluyas nada del informe ni diapositivas, eso lo hacemos luego"
+
+Respuesta / Decisión técnica:
+- Exclusión total de documentos de texto/diapositivas para enfocarse en componentes de código y reproducibilidad.
+- Incorporación de load_transformer_model y get_transformer_tokenizer en src/models.py según requerimiento de la rúbrica.
+- Integración de compute_transformer_metrics en src/evaluate.py.
+- Corrección de sintaxis y ruta de ejecución en notebooks/04_transformer_extension.ipynb.
+- Actualización de registros de autoría en prompts/AIGen_Interactions.md y prompts/prompt_logs.txt.
+================================================================================

@@ -128,3 +128,55 @@ Las mejores filas provienen de `outputs/metrics/gridsearch_<modelo>.csv`.
 - Figuras: `outputs/figures/`
 - Pesos: `outputs/saved_models/`
 - Log de ejecución: `logs/training_logs.txt`
+
+
+---
+
+## Extensión con Transformers (DistilBERT)
+
+**Notebook:** `notebooks/04_transformer_extension.ipynb`  
+**Autor:** Nicholas Solís Pinilla  
+**Datos:** `data/processed/train.csv` (800) y `test.csv` (200), mismos splits estratificados fijados desde el EDA.  
+**Semilla:** 42  
+
+### Configuración del Modelo y Tokenizador
+- **Modelo Base:** `distilbert-base-uncased` (6 capas Transformer Encoder, 12 cabezas de atención, $d=768$).
+- **Tokenización:** WordPiece con vocabulario de 30,522 sub-palabras (`AutoTokenizer`).
+- **Longitud máxima:** `MAX_LEN = 64` (cubre el 99% de las secuencias de GoEmotions).
+- **Parámetros entrenables:** 66,955,010.
+
+### Hiperparámetros de Fine-Tuning
+- **Optimizador / Algoritmo:** AdamW con peso decaído (`weight_decay = 0.01`).
+- **Learning rate:** $3 \times 10^{-5}$ con scheduler lineal.
+- **Batch size:** 16 en entrenamiento, 32 en evaluación.
+- **Épocas:** 3 épocas completas (50 pasos por época con lote de 16 = 150 pasos de optimización).
+- **Estrategia de evaluación:** Por época (`eval_strategy="epoch"`).
+
+### Métricas de Evaluación
+Se calcularon las 5 métricas oficiales mediante `compute_metrics` compatible con `src/evaluate.py`:
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Cohen's Kappa ($\kappa$)
+
+### Vínculo Teórico con Máquinas de Turing
+- **Mecanismo de Auto-Atención:** Opera con direccionamiento asociativo $O(1)$ directo sobre la cinta de entrada, superando el cuello de botella secuencial y desvanecimiento de gradiente característico de las RNN y LSTM ($O(T)$).
+- **Preentrenamiento masivo:** Dota al modelo de representaciones semánticas profundas previas al ajuste supervisado, permitiendo generalizar con solidez incluso en datasets reducidos como esta muestra balanceada de 1,000 comentarios.
+
+### Archivos Generados
+- `outputs/metrics/distilbert.json`
+- `outputs/metrics/comparison.csv` (actualizado con los 6 modelos)
+- `outputs/figures/distilbert_confusion_matrix.png`
+- `outputs/figures/all_models_metrics_comparison.png`
+
+### Tabla Comparativa Integral Consolidada (`outputs/metrics/comparison.csv`)
+| Modelo | Accuracy | Precision | Recall | F1 | Kappa ($\kappa$) | Parámetros | Tiempo/Run |
+|---|---|---|---|---|---|---|---|
+| Baseline Dummy (stratified) | 0.500 | 0.500 | 0.510 | 0.505 | 0.000 | - | - |
+| Dense | 0.648 ± 0.026 | 0.723 ± 0.037 | 0.496 ± 0.129 | 0.575 ± 0.082 | 0.296 ± 0.052 | 143,873 | 0.5s |
+| Vanilla RNN | 0.558 ± 0.032 | 0.577 ± 0.045 | 0.506 ± 0.142 | 0.524 ± 0.065 | 0.116 ± 0.064 | 144,929 | 3.1s |
+| LSTM | 0.625 ± 0.043 | 0.720 ± 0.073 | 0.422 ± 0.130 | 0.519 ± 0.091 | 0.250 ± 0.086 | 154,337 | 2.9s |
+| BiLSTM | 0.677 ± 0.039 | 0.695 ± 0.068 | 0.670 ± 0.084 | 0.674 ± 0.019 | 0.354 ± 0.078 | 166,913 | 6.3s |
+| **DistilBERT (Transformer)** | **0.900** | **0.892** | **0.910** | **0.901** | **0.800** | **66,955,010** | **147.9s** |
+

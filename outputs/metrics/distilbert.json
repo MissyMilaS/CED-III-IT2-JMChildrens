@@ -1,0 +1,20 @@
+{
+  "model": "distilbert",
+  "accuracy": 0.9,
+  "precision": 0.8922,
+  "recall": 0.91,
+  "f1": 0.901,
+  "kappa": 0.8,
+  "n_params": 66955010,
+  "train_seconds_per_run": 235.8,
+  "confusion_matrix": [
+    [
+      89,
+      11
+    ],
+    [
+      9,
+      91
+    ]
+  ]
+}

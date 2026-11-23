@@ -85,3 +85,27 @@ def build_model(name, vocab_size, **kw):  # fábrica: crea el modelo a partir de
 
 def count_params(model):  # cuenta cuántos números entrenables tiene el modelo (complejidad)
     return sum(p.numel() for p in model.parameters() if p.requires_grad)  # suma el tamaño de cada tensor entrenable
+
+
+# =====================================================================
+# Extensión Transformer: DistilBERT para Clasificación de Sentimiento
+# =====================================================================
+def load_transformer_model(model_name="distilbert-base-uncased", num_labels=2, id2label=None, label2id=None):
+    """Carga y configura el modelo preentrenado Hugging Face para clasificación de secuencia.
+    
+    Por defecto usa 'distilbert-base-uncased' (6 capas Transformer Encoder, 12 cabezas de atención,
+    dimensión oculta d=768, ~66.9M parámetros).
+    """
+    from transformers import AutoModelForSequenceClassification
+    kwargs = {"num_labels": num_labels}
+    if id2label is not None:
+        kwargs["id2label"] = id2label
+    if label2id is not None:
+        kwargs["label2id"] = label2id
+    return AutoModelForSequenceClassification.from_pretrained(model_name, **kwargs)
+
+
+def get_transformer_tokenizer(model_name="distilbert-base-uncased"):
+    """Carga el tokenizador WordPiece preentrenado correspondiente al Transformer."""
+    from transformers import AutoTokenizer
+    return AutoTokenizer.from_pretrained(model_name)

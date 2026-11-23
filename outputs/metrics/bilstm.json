@@ -1,35 +1,35 @@
 {
   "model": "bilstm",
-  "accuracy": 0.64,
-  "precision": 0.6639,
-  "recall": 0.656,
-  "f1": 0.6381,
-  "kappa": 0.28,
+  "accuracy": 0.677,
+  "precision": 0.6945,
+  "recall": 0.67,
+  "f1": 0.6744,
+  "kappa": 0.354,
   "confusion_matrix": [
     [
-      62.4,
-      37.6
+      68.4,
+      31.6
     ],
     [
-      34.4,
-      65.6
+      33.0,
+      67.0
     ]
   ],
   "std": {
-    "accuracy": 0.0695,
-    "precision": 0.0795,
-    "recall": 0.1688,
-    "f1": 0.0778,
-    "kappa": 0.139
+    "accuracy": 0.0389,
+    "precision": 0.0676,
+    "recall": 0.0841,
+    "f1": 0.0192,
+    "kappa": 0.0779
   },
   "n_seeds": 5,
   "params": {
     "emb_dim": 64,
     "dropout": 0.5,
     "hidden": 32,
-    "batch_size": 64,
+    "batch_size": 16,
     "lr": 0.003
   },
-  "n_params": 167105,
-  "train_seconds_per_run": 1.6
+  "n_params": 166913,
+  "train_seconds_per_run": 6.3
 }

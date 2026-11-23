@@ -26,3 +26,15 @@ def save_metrics(name, metrics, y_true=None, y_pred=None):
         out["confusion_matrix"] = confusion_matrix(y_true, y_pred).tolist()
     (METRICS_DIR / f"{name}.json").write_text(json.dumps(out, indent=2))
     return out
+
+
+def compute_transformer_metrics(eval_pred):
+    """Adaptador de compute_metrics para el Trainer de Hugging Face.
+    
+    Recibe eval_pred (tupla de logits y etiquetas reales) y calcula
+    las 5 métricas oficiales del proyecto: Accuracy, Precision, Recall, F1 y Cohen's Kappa.
+    """
+    import numpy as np
+    logits, labels = eval_pred
+    preds = np.argmax(logits, axis=-1)
+    return compute_metrics(labels, preds)
