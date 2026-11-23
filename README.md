@@ -19,14 +19,6 @@ Nicholas Solis A00411205
 Santiago Cabal A00412508
 Heidy Hernandez A00411232
 
-## Requisitos e instrucciones
-- Heidy Yuliana Hernández Huila — A00411232
-- María Camila Salamanca — A00411234
-- Nicholas Solís — A0041--05
-- Sarah Rodríguez — A00411438
-- Santiago Cabal — A00
-
-
 
 ## Tecnologías
 
