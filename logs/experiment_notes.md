@@ -128,3 +128,45 @@ Las mejores filas provienen de `outputs/metrics/gridsearch_<modelo>.csv`.
 - Figuras: `outputs/figures/`
 - Pesos: `outputs/saved_models/`
 - Log de ejecución: `logs/training_logs.txt`
+
+
+---
+
+## Extensión con Transformers (DistilBERT)
+
+**Notebook:** `notebooks/04_transformer_extension.ipynb`  
+**Autor:** Nicholas Solís Pinilla  
+**Datos:** `data/processed/train.csv` (800) y `test.csv` (200), mismos splits estratificados fijados desde el EDA.  
+**Semilla:** 42  
+
+### Configuración del Modelo y Tokenizador
+- **Modelo Base:** `distilbert-base-uncased` (6 capas Transformer Encoder, 12 cabezas de atención, $d=768$).
+- **Tokenización:** WordPiece con vocabulario de 30,522 sub-palabras (`AutoTokenizer`).
+- **Longitud máxima:** `MAX_LEN = 64` (cubre el 99% de las secuencias de GoEmotions).
+- **Parámetros entrenables:** 66,955,010.
+
+### Hiperparámetros de Fine-Tuning
+- **Optimizador / Algoritmo:** AdamW con peso decaído (`weight_decay = 0.01`).
+- **Learning rate:** $3 \times 10^{-5}$ con scheduler lineal.
+- **Batch size:** 16 en entrenamiento, 32 en evaluación.
+- **Épocas:** 3 épocas completas (50 pasos por época con lote de 16 = 150 pasos de optimización).
+- **Estrategia de evaluación:** Por época (`eval_strategy="epoch"`).
+
+### Métricas de Evaluación
+Se calcularon las 5 métricas oficiales mediante `compute_metrics` compatible con `src/evaluate.py`:
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Cohen's Kappa ($\kappa$)
+
+### Vínculo Teórico con Máquinas de Turing
+- **Mecanismo de Auto-Atención:** Opera con direccionamiento asociativo $O(1)$ directo sobre la cinta de entrada, superando el cuello de botella secuencial y desvanecimiento de gradiente característico de las RNN y LSTM ($O(T)$).
+- **Preentrenamiento masivo:** Dota al modelo de representaciones semánticas profundas previas al ajuste supervisado, permitiendo generalizar con solidez incluso en datasets reducidos como esta muestra balanceada de 1,000 comentarios.
+
+### Archivos Generados
+- `outputs/metrics/distilbert.json`
+- `outputs/metrics/comparison.csv` (actualizado con los 6 modelos)
+- `outputs/figures/distilbert_confusion_matrix.png`
+- `outputs/figures/distilbert_training_curves.png`
+- `outputs/figures/all_models_metrics_comparison.png`
