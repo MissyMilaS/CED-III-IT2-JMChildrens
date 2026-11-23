@@ -35,11 +35,17 @@ generativa utilizadas en la actividad.
 3. *"Hola, por favor lee todo el repositorio, el pdf de la integradora, el contexto y el archivo .ipynb de guia y confirmame si entiendes como seguir con lo que falta, tambien mira mis commits y las ramas del repo en git para saber si hay cambios que tener en cuenta antes de montar algo"*
 4. *"si por favor, trata de darme cosas para commitear"*
 5. *"siguiente paso por favor, no incluyas nada del informe ni diapositivas, el IAGEN_Inter ya lo commitiaste?"*
+6. *"vale, listo, continuemos"*
+7. *"listo, vuelve a revisar si todo esta bien y continuemos, recuerda que es un trabajo en equipo y pueden haber conflictos"*
 
 ### Trabajo Realizado y Comprensión Conceptual
 - Auditoría profunda de las ramas remotas de Git (`origin/dev`, `origin/feat_neuralModels`, `origin/feat_docs`), detectando la divergencia de métricas finales promediadas sobre 5 semillas para los modelos neuronales (Dense, Vanilla RNN, LSTM, BiLSTM).
 - Sincronización rigurosa de `outputs/metrics/comparison.csv` y generación de la figura `outputs/figures/all_models_metrics_comparison.png` a 200 DPI con nombres y etiquetas académicas.
 - Modularización de la arquitectura Transformer en `src/models.py` (`load_transformer_model`, `get_transformer_tokenizer`) para dar cumplimiento estricto a la estructura de entregables de la rúbrica.
 - Integración de `compute_transformer_metrics` en `src/evaluate.py` compatible con el ciclo de evaluación del `Trainer` de Hugging Face.
-- Corrección de sintaxis y robustez de rutas en `notebooks/04_transformer_extension.ipynb`.
+- Corrección de sintaxis y robustez de rutas en `notebooks/04_transformer_extension.ipynb`, persistiendo salidas de ejecución y gráficos en base64.
+- Detección en vivo de commits remotos en `origin/feat_docs` confirmando ausencia de conflictos de código y pruebas de fusión de 3 vías (`git merge-tree`).
+- Implementación y ejecución de la suite automatizada de calidad `src/validate_pipeline.py` (5/5 suites aprobadas).
+- Enriquecimiento de `src/run_transformer.py` con interfaz CLI por argumentos (`argparse`), predicción individual e integración de pesos.
+
 
