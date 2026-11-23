@@ -13,7 +13,7 @@ El repositorio incluye:
 
 ## Integrantes
 
-Sarah Rodriguez A00411232
+Sarah Rodriguez A00411438
 Maria Camila Salamanca A00411234
 Nicholas Solis A00411205
 Santiago Cabal A00412508
