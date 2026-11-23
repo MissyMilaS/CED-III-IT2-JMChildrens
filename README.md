@@ -13,6 +13,13 @@ El repositorio incluye:
 
 ## Integrantes
 
+Sarah Rodriguez A00411232
+Maria Camila Salamanca A00411234
+Nicholas Solis A00411205
+Santiago Cabal A00412508
+Heidy Hernandez A00411232
+
+## Requisitos e instrucciones
 - Heidy Yuliana Hernández Huila — A00411232
 - María Camila Salamanca — A00411234
 - Nicholas Solís — A0041--05
