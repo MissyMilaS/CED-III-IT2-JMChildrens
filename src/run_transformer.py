@@ -177,7 +177,11 @@ def run_pipeline(epochs=3, lr=3e-5, batch_size=16, max_len=64, model_name="disti
     print(f"[*] Datos cargados: {len(train_df)} train, {len(test_df)} test.")
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    ds_train = Dataset.from_pandas(train_df[["text", "label"]])
+    from sklearn.model_selection import train_test_split
+    # 15% de train como validación; el test solo se usa en la evaluación final
+    tr_df, val_df = train_test_split(train_df, test_size=0.15, stratify=train_df["label"], random_state=SEED)
+    ds_train = Dataset.from_pandas(tr_df[["text", "label"]].reset_index(drop=True))
+    ds_val = Dataset.from_pandas(val_df[["text", "label"]].reset_index(drop=True))
     ds_test = Dataset.from_pandas(test_df[["text", "label"]])
 
     def tok_fn(batch):
@@ -185,6 +189,7 @@ def run_pipeline(epochs=3, lr=3e-5, batch_size=16, max_len=64, model_name="disti
 
     ds_train = ds_train.map(tok_fn, batched=True)
     ds_test = ds_test.map(tok_fn, batched=True)
+    ds_val = ds_val.map(tok_fn, batched=True)
 
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
@@ -212,7 +217,7 @@ def run_pipeline(epochs=3, lr=3e-5, batch_size=16, max_len=64, model_name="disti
         model=model,
         args=training_args,
         train_dataset=ds_train,
-        eval_dataset=ds_test,
+        eval_dataset=ds_val,
         processing_class=tokenizer,
         data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
         compute_metrics=compute_metrics

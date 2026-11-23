@@ -20,3 +20,5 @@ Thumbs.db
 *.pt
 *.pth
 *.safetensors
+# Checkpoints de Hugging Face (pesados)
+outputs/distilbert_checkpoints/

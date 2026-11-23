@@ -56,3 +56,12 @@ Respuesta / Decisión técnica:
 - Corrección de sintaxis y ruta de ejecución en notebooks/04_transformer_extension.ipynb.
 - Actualización de registros de autoría en prompts/AIGen_Interactions.md y prompts/prompt_logs.txt.
 ================================================================================
+
+[2026-11-22 23:55] SESIÓN 3: REVISIÓN FINAL (Claude Code)
+Prompt 8: "Hola Claude, puedes revisar el pdf de la integradora, el contexto y todo el proyecto en general para saber que cosas faltan y hacer una evaluacion de todo el trabajo para saber que podemos mejorar para sacar 5, gracias"
+Prompt 9: "Ok, necesitamos entregar ya, se supone que estamos en main, jala y trae todo, miralo de nuevo y corrige todo lo que falte y dime como hacer el push final para que todo quede bien, y me muestras todo lo que cambiaste, gracias"
+Respuesta / Decisión técnica:
+- Se detectaron salidas del notebook 04 que no venían de una ejecución real: se reejecutó el notebook y se usaron solo los resultados reales.
+- La validación ahora sale de train (15%) y el test queda solo para la evaluación final.
+- Limpieza del repositorio y actualización del reporte con DistilBERT.
+================================================================================

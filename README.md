@@ -108,9 +108,29 @@ El proyecto utiliza el conjunto de datos GoEmotions.
 
 Los archivos originales deben conservarse sin modificaciones dentro de `data/raw/`. Las entradas procesadas se generan dentro de `data/processed/` mediante los notebooks o los módulos de `src/`.
 
-El repositorio no descarga automáticamente el conjunto de datos original. Comprueba que los archivos requeridos estén disponibles antes de ejecutar los notebooks.
+Los CSV originales de GoEmotions (Kaggle) ya están incluidos en `data/raw/`, y los splits procesados (`train.csv` 800 / `test.csv` 200) en `data/processed/`. Ver `data/README.md`.
 
-## Resultados
+## Resultados (test, 200 comentarios)
+
+| Modelo | Accuracy | Precision | Recall | F1 | Kappa |
+|---|---|---|---|---|---|
+| Baseline (Dummy stratified) | 0.500 | 0.500 | 0.510 | 0.505 | 0.000 |
+| Dense NN | 0.648 ± 0.026 | 0.723 ± 0.037 | 0.496 ± 0.129 | 0.575 ± 0.082 | 0.296 ± 0.052 |
+| Vanilla RNN | 0.558 ± 0.032 | 0.577 ± 0.045 | 0.506 ± 0.142 | 0.524 ± 0.065 | 0.116 ± 0.064 |
+| LSTM | 0.625 ± 0.043 | 0.720 ± 0.073 | 0.422 ± 0.130 | 0.519 ± 0.091 | 0.250 ± 0.086 |
+| BiLSTM (extra) | 0.677 ± 0.039 | 0.695 ± 0.068 | 0.670 ± 0.084 | 0.674 ± 0.019 | 0.354 ± 0.078 |
+| **DistilBERT** (1 semilla) | **0.900** | **0.908** | **0.890** | **0.899** | **0.800** |
+
+Los modelos Dense/RNN/LSTM/BiLSTM reportan media ± desviación estándar sobre 5 semillas (777–781). DistilBERT se reporta con una sola ejecución (semilla 42); su validación es el 15% de train.
+
+### Ejecutar solo la extensión Transformer
+
+```bash
+python src/run_transformer.py --train          # entrena y evalúa DistilBERT (~3 min en CPU)
+python src/run_transformer.py --update_plots   # regenera comparison.csv y la figura comparativa
+```
+
+## Otros resultados
 
 Los resultados de experimentos disponibles incluyen:
 
@@ -128,7 +148,7 @@ Estos archivos se encuentran dentro de `outputs/`.
 
 Información adicional disponible en `docs/`:
 
-- Informe académico.
-- Presentación.
+- `report.pdf`: informe final (inglés, 4 páginas).
+- `presentation.pdf`: presentación final.
 - Análisis comparativo.
 - Archivo de referencias bibliográficas.

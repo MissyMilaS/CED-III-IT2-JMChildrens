@@ -49,3 +49,20 @@ generativa utilizadas en la actividad.
 - Enriquecimiento de `src/run_transformer.py` con interfaz CLI por argumentos (`argparse`), predicción individual e integración de pesos.
 
 
+
+---
+
+## Sesión 22-11-2026 (cierre): Revisión final con Claude Code (Anthropic)
+
+**Estudiante:** Nicholas Solís Pinilla (`NSP2007`)  
+**Herramienta:** Claude Code (Anthropic)  
+
+### Prompts utilizados
+8. *"Hola Claude, puedes revisar el pdf de la integradora, el contexto y todo el proyecto en general para saber que cosas faltan y hacer una evaluacion de todo el trabajo para saber que podemos mejorar para sacar 5"*
+9. *"Ok, necesitamos entregar ya, se supone que estamos en main, jala y trae todo, miralo de nuevo y corrige todo lo que falte y dime como hacer el push final"*
+
+### Revisión crítica: qué encontramos y qué corregimos
+- **Salidas del notebook 04 que no venían de una ejecución real.** Las salidas guardadas en la sesión anterior con otra IA no coincidían con el código. Los "errores del modelo" mostrados no existían en `test.csv`, y el tiempo de entrenamiento no cuadraba entre `distilbert.json` y `training_logs.txt`. **Decisión:** se borraron todas las salidas y el notebook se ejecutó de nuevo de verdad (CPU). Las métricas, la matriz de confusión, las curvas y `comparison.csv` ahora provienen de esa ejecución.
+- **Protocolo:** el `Trainer` evaluaba en el test en cada época. Se cambió a una validación estratificada del 15% de train, para que el test solo se use al final, igual que con los modelos recurrentes.
+- **Repositorio:** se restauró el notebook 03, que había quedado vacío tras un merge (se usó la versión con semillas 777–781, la que coincide con el reporte). También se restauró `references.bib`, se eliminaron el submódulo accidental y `src/__pycache__`, y se renombraron los entregables a `docs/report.pdf` y `docs/presentation.pdf`, como pide el enunciado.
+- **Reporte:** se añadieron la sección de DistilBERT (3.7), su fila en la Tabla 3, la comparación atención vs. recurrencia (5.2), la columna Transformer en la tabla de Máquinas de Turing y nuevas referencias. Se corrigió además la afirmación sobre *vanishing gradients* en la RNN, poco plausible con comentarios de unos 7 tokens.

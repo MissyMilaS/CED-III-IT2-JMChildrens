@@ -171,8 +171,10 @@ Las mejores filas provienen de `outputs/metrics/gridsearch_<modelo>.csv`.
 - **Optimizador / Algoritmo:** AdamW con peso decaído (`weight_decay = 0.01`).
 - **Learning rate:** $3 \times 10^{-5}$ con scheduler lineal.
 - **Batch size:** 16 en entrenamiento, 32 en evaluación.
-- **Épocas:** 3 épocas completas (50 pasos por época con lote de 16 = 150 pasos de optimización).
-- **Estrategia de evaluación:** Por época (`eval_strategy="epoch"`).
+- **Épocas:** 3 (43 pasos por época sobre 680 comentarios = 129 pasos de optimización).
+- **Validación:** 15% estratificado de train (120 comentarios), evaluado por época. El test (200) se usa una sola vez al final.
+- **Curva real (validación):** época 1: loss 0.509, acc 0.800; época 2: loss 0.423, acc 0.825; época 3: loss 0.413, acc 0.850.
+- **Nota:** se descartaron las salidas de una ejecución anterior que no eran verificables; estos resultados provienen de la reejecución del 22-11-2026 (23:54).
 
 ### Métricas de Evaluación
 Se calcularon las 5 métricas oficiales mediante `compute_metrics` compatible con `src/evaluate.py`:
@@ -200,5 +202,5 @@ Se calcularon las 5 métricas oficiales mediante `compute_metrics` compatible co
 | Vanilla RNN | 0.558 ± 0.032 | 0.577 ± 0.045 | 0.506 ± 0.142 | 0.524 ± 0.065 | 0.116 ± 0.064 | 144,929 | 3.1s |
 | LSTM | 0.625 ± 0.043 | 0.720 ± 0.073 | 0.422 ± 0.130 | 0.519 ± 0.091 | 0.250 ± 0.086 | 154,337 | 2.9s |
 | BiLSTM | 0.677 ± 0.039 | 0.695 ± 0.068 | 0.670 ± 0.084 | 0.674 ± 0.019 | 0.354 ± 0.078 | 166,913 | 6.3s |
-| **DistilBERT (Transformer)** | **0.900** | **0.892** | **0.910** | **0.901** | **0.800** | **66,955,010** | **147.9s** |
+| **DistilBERT (Transformer)** | **0.900** | **0.908** | **0.890** | **0.899** | **0.800** | **66,955,010** | **177.6s** |
 

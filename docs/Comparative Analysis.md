@@ -13,15 +13,15 @@ All models are evaluated on the same 200-comment test set (100 positive, 100 neg
 | Vanilla RNN | 0.558 ± 0.032 | 0.577 ± 0.045 | 0.506 ± 0.142 | 0.524 ± 0.065 | 0.116 ± 0.064 |
 | LSTM | 0.625 ± 0.043 | 0.720 ± 0.073 | 0.422 ± 0.130 | 0.519 ± 0.091 | 0.250 ± 0.086 |
 | BiLSTM (recurrent best) | 0.677 ± 0.039 | 0.695 ± 0.068 | 0.670 ± 0.084 | 0.674 ± 0.019 | 0.354 ± 0.078 |
-| **DistilBERT (Transformer)** | **0.900** | **0.892** | **0.910** | **0.901** | **0.800** |
+| **DistilBERT (Transformer)** | **0.900** | **0.908** | **0.890** | **0.899** | **0.800** |
 
 - **Against the baseline:** Among models trained from scratch, the BiLSTM is the strongest recurrent architecture (accuracy 0.677, F1 0.674, kappa 0.354), followed by Dense (0.648, 0.575, 0.296) and the LSTM (0.625, 0.519, 0.250). The vanilla RNN is only 5.8 accuracy points above chance (kappa 0.116) and one seed fell below it (0.495), demonstrating severe instability due to vanishing gradients.
-- **The Transformer leap (DistilBERT):** DistilBERT decisively shatters the performance ceiling of all models trained from scratch, reaching **0.900 accuracy, 0.901 F1, and 0.800 Cohen's Kappa**. This represents an absolute gain of **+22.3 percentage points in accuracy and +0.446 in Kappa over the BiLSTM**, and +40.0 points over the baseline.
+- **The Transformer leap (DistilBERT):** DistilBERT decisively shatters the performance ceiling of all models trained from scratch, reaching **0.900 accuracy, 0.899 F1, and 0.800 Cohen's Kappa**. This represents an absolute gain of **+22.3 percentage points in accuracy and +0.446 in Kappa over the BiLSTM**, and +40.0 points over the baseline.
 - **Why does DistilBERT outperform recurrent models by such a wide margin?**
-  1. *Transfer learning vs. scratch training:* Dense, RNN, and LSTM models had to learn token embeddings from scratch using only 800 training comments (vocab size ~2,490 tokens). With such small data, recurrent weights easily overfit or fail to capture rich semantics. DistilBERT comes pre-trained on Wikipedia and BookCorpus (~3.3 billion tokens), possessing deep prior syntactic and affective knowledge.
+  1. *Transfer learning vs. scratch training:* Dense, RNN, and LSTM models had to learn token embeddings from scratch using only 800 training comments (vocab size 2,215 tokens). With such small data, recurrent weights easily overfit or fail to capture rich semantics. DistilBERT comes pre-trained on Wikipedia and BookCorpus (~3.3 billion tokens), possessing deep prior syntactic and affective knowledge.
   2. *Subword tokenization (WordPiece):* While recurrent models mapped unseen test words to `<unk>` (losing information), DistilBERT's WordPiece vocabulary (30,522 tokens) splits out-of-vocabulary words into informative sub-tokens (`superunbelievable` $\rightarrow$ `super`, `##un`, `##bel`, `##ie`, `##vable`), preventing out-of-vocabulary degradation.
 - **Does sequence order matter?** For models trained from scratch, the effect was marginal: Dense (which ignores order via average pooling) matched the unidirectional LSTM (0.648 vs. 0.625). However, BiLSTM improved balance across classes. DistilBERT uses learned positional embeddings, allowing full permutation-sensitive understanding without sequential recurrence bottlenecks.
-- **Error balance:** Dense and LSTM exhibit high precision (0.723 and 0.720) but poor recall (0.496 and 0.422), disproportionately predicting the negative class. BiLSTM achieves balance (0.695 precision / 0.670 recall). DistilBERT achieves near-perfect balance (0.892 precision / 0.910 recall) on the 200 test comments (TN: 89, FP: 11, FN: 9, TP: 91).
+- **Error balance:** Dense and LSTM exhibit high precision (0.723 and 0.720) but poor recall (0.496 and 0.422), disproportionately predicting the negative class. BiLSTM achieves balance (0.695 precision / 0.670 recall). DistilBERT achieves near-perfect balance (0.908 precision / 0.890 recall) on the 200 test comments (TN: 91, FP: 9, FN: 11, TP: 89).
 
 ## Training Complexity
 
@@ -33,14 +33,14 @@ Complexity scales sharply from the memoryless Dense network to the heavy Transfo
 | Vanilla RNN | 144,929 | Embeddings + 1 RNN tanh layer + Linear | 3.1s (CPU) | $T$ sequential updates ($h_t = \tanh(W x_t + U h_{t-1})$) |
 | LSTM | 154,337 | Embeddings + 1 LSTM (4 gates) + Linear | 2.9s (CPU) | $T$ sequential updates ($4\times$ work per step: $i, f, o, c$) |
 | BiLSTM | 166,913 | Embeddings + 2 LSTMs (forward + backward) | 6.3s (CPU) | $2T$ sequential updates across both directions |
-| **DistilBERT** | **66,955,010** | **6 Transformer Encoders (12 heads, $d=768$) + Head** | **~148s - 235s (CPU)** | **Parallel self-attention ($O(T^2 \cdot d)$), $O(1)$ path length** |
+| **DistilBERT** | **66,955,010** | **6 Transformer Encoders (12 heads, $d=768$) + Head** | **~178s (CPU)** | **Parallel self-attention ($O(T^2 \cdot d)$), $O(1)$ path length** |
 
 - **Parameter distribution:** In the neural models trained from scratch, the embedding matrix (2,215 words $\times$ 64 dims $\approx$ 141,760 params) represented 85–99% of total parameters, leaving only 2k–25k parameters in the recurrent control. In DistilBERT, the 6 Transformer encoder blocks account for ~66.3M parameters, providing immense expressive capacity.
 - **Optimization and convergence:**
   - *Vanilla RNN:* Highly unstable; required gradient clipping at 1.0 and early stopping. Cross-validation chose $epoch=1$, indicating rapid overfitting.
   - *LSTM / BiLSTM:* Stable convergence with early stopping (patience 5, stopped at epoch 2–5). Overfitting prevented hidden sizes $>32$.
-  - *DistilBERT:* Optimized with AdamW ($lr = 3\times 10^{-5}$, weight decay $0.01$, linear schedule). Over 3 full epochs (150 steps), training loss steadily decreased from 0.482 to 0.171 while evaluation loss dropped to 0.282, confirming smooth fine-tuning without catastrophic forgetting.
-- **Resource trade-off:** DistilBERT takes $\sim 25\times$ the training time of BiLSTM and $\sim 300\times$ that of Dense on CPU. However, for inference on single comments, DistilBERT executes in under 25ms, making it fully viable for real-time social media processing.
+  - *DistilBERT:* Optimized with AdamW ($lr = 3\times 10^{-5}$, weight decay $0.01$, linear schedule). Trained on 680 comments and monitored on a 120-comment validation split (15% of train; the test set is used only once at the end). Over 3 epochs (129 steps), training loss decreased from 0.629 to 0.209 and validation loss from 0.509 to 0.413 (validation accuracy 0.800 → 0.850).
+- **Resource trade-off:** DistilBERT takes $\sim 25\times$ the training time of BiLSTM and $\sim 300\times$ that of Dense on CPU. Inference latency was not measured.
 
 ## Interpretability
 
@@ -51,7 +51,7 @@ Interpretability varies inversely with recurrent state complexity, while attenti
 - **BiLSTM:** Concatenates hidden states from both directions, obscuring the attribution of individual tokens.
 - **DistilBERT (Self-Attention):**
   - Attention maps in each of the 12 heads allow observing how tokens interact. For instance, the `[CLS]` token assigns high attention weights to polarizing adjectives (*"amazing"*, *"unwatchable"*) and negation modifiers (*"not"*, *"never"*).
-  - *Theoretical caution:* In line with Jain & Wallace (2019) (*"Attention is not Explanation"*), attention distributions reflect internal routing rather than faithful post-hoc explanations. Nonetheless, gradient-based saliency confirms that DistilBERT isolates sentiment markers significantly better than recurrent hidden states.
+  - *Theoretical caution:* In line with Jain & Wallace (2019) (*"Attention is not Explanation"*), attention distributions reflect internal routing rather than faithful post-hoc explanations. We did not run a saliency analysis, so we make no claim about which tokens drive its decisions.
 
 ## Relation to Turing Machine Concepts
 
