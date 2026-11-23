@@ -168,5 +168,15 @@ Se calcularon las 5 métricas oficiales mediante `compute_metrics` compatible co
 - `outputs/metrics/distilbert.json`
 - `outputs/metrics/comparison.csv` (actualizado con los 6 modelos)
 - `outputs/figures/distilbert_confusion_matrix.png`
-- `outputs/figures/distilbert_training_curves.png`
 - `outputs/figures/all_models_metrics_comparison.png`
+
+### Tabla Comparativa Integral Consolidada (`outputs/metrics/comparison.csv`)
+| Modelo | Accuracy | Precision | Recall | F1 | Kappa ($\kappa$) | Parámetros | Tiempo/Run |
+|---|---|---|---|---|---|---|---|
+| Baseline Dummy (stratified) | 0.500 | 0.500 | 0.510 | 0.505 | 0.000 | - | - |
+| Dense | 0.648 ± 0.026 | 0.723 ± 0.037 | 0.496 ± 0.129 | 0.575 ± 0.082 | 0.296 ± 0.052 | 143,873 | 0.5s |
+| Vanilla RNN | 0.558 ± 0.032 | 0.577 ± 0.045 | 0.506 ± 0.142 | 0.524 ± 0.065 | 0.116 ± 0.064 | 144,929 | 3.1s |
+| LSTM | 0.625 ± 0.043 | 0.720 ± 0.073 | 0.422 ± 0.130 | 0.519 ± 0.091 | 0.250 ± 0.086 | 154,337 | 2.9s |
+| BiLSTM | 0.677 ± 0.039 | 0.695 ± 0.068 | 0.670 ± 0.084 | 0.674 ± 0.019 | 0.354 ± 0.078 | 166,913 | 6.3s |
+| **DistilBERT (Transformer)** | **0.900** | **0.892** | **0.910** | **0.901** | **0.800** | **66,955,010** | **147.9s** |
+
