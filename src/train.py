@@ -64,153 +64,153 @@ def load_tokens(text_mode="clean"):  # lee los CSV y devuelve los comentarios co
     text_mode='full' : tokeniza `text` conservando stopwords (para el estudio de ablación).
     Devuelve (tok_train, y_train, tok_test, y_test) con tokens en listas de listas.
     """
-    train = pd.read_csv(DATA_DIR / "train.csv")  # carga el conjunto de entrenamiento (800 filas)
-    test = pd.read_csv(DATA_DIR / "test.csv")  # carga el conjunto de prueba (200 filas)
-    if text_mode == "clean":  # usar el texto ya limpio por Sarah
-        tok = lambda s: [str(t).split() if isinstance(t, str) else [] for t in s]  # separa por espacios; si la celda quedó vacía (NaN) devuelve lista vacía
-        tok_tr, tok_te = tok(train["clean"]), tok(test["clean"])  # tokens de train y de test
-    elif text_mode == "full":  # usar el texto original conservando stopwords
-        from src.preprocessing import tokenize  # se importa aquí para no exigir nltk si no se usa
-        tok_tr = [tokenize(t, remove_stopwords=False) for t in train["text"]]  # tokeniza cada comentario de train sin quitar stopwords
-        tok_te = [tokenize(t, remove_stopwords=False) for t in test["text"]]  # igual para test
-    else:  # cualquier otro valor es un error de uso
-        raise ValueError("text_mode debe ser 'clean' o 'full'")  # mensaje claro
-    return (tok_tr, train["label"].astype(int).values,  # tokens y etiquetas (0 neg / 1 pos) de train
-            tok_te, test["label"].astype(int).values)  # tokens y etiquetas de test
+    train = pd.read_csv(DATA_DIR / "train.csv")
+    test = pd.read_csv(DATA_DIR / "test.csv")
+    if text_mode == "clean":
+        tok = lambda s: [str(t).split() if isinstance(t, str) else [] for t in s]
+        tok_tr, tok_te = tok(train["clean"]), tok(test["clean"])
+    elif text_mode == "full":
+        from src.preprocessing import tokenize
+        tok_tr = [tokenize(t, remove_stopwords=False) for t in train["text"]]
+        tok_te = [tokenize(t, remove_stopwords=False) for t in test["text"]]
+    else:
+        raise ValueError("text_mode debe ser 'clean' o 'full'")
+    return (tok_tr, train["label"].astype(int).values,
+            tok_te, test["label"].astype(int).values)
 
 
-def build_vocab(token_lists, max_size=MAX_VOCAB, min_freq=1):  # crea el diccionario palabra -> id
+def build_vocab(token_lists, max_size=MAX_VOCAB, min_freq=1):
     """Vocabulario construido SOLO con datos de entrenamiento (evita fuga)."""
-    counts = Counter(t for toks in token_lists for t in toks)  # frecuencia de cada palabra en los comentarios recibidos
-    words = [w for w, c in counts.most_common(max_size - 2) if c >= min_freq]  # las palabras más frecuentes (deja 2 lugares para <pad> y <unk>)
-    vocab = {"<pad>": PAD, "<unk>": UNK}  # ids reservados: 0 relleno, 1 desconocida
-    vocab.update({w: i + 2 for i, w in enumerate(words)})  # el resto de palabras recibe ids desde 2
-    return vocab  # diccionario final
+    counts = Counter(t for toks in token_lists for t in toks)
+    words = [w for w, c in counts.most_common(max_size - 2) if c >= min_freq]
+    vocab = {"<pad>": PAD, "<unk>": UNK}
+    vocab.update({w: i + 2 for i, w in enumerate(words)})
+    return vocab
 
 
-def encode(token_lists, vocab, max_len=MAX_LEN):  # convierte tokens a tensores de enteros con padding
+def encode(token_lists, vocab, max_len=MAX_LEN):
     """Tokens -> tensor (N, max_len) con padding a la derecha + longitudes reales (>= 1)."""
-    ids = np.zeros((len(token_lists), max_len), dtype=np.int64)  # matriz N x max_len llena de 0 (= <pad>)
-    lengths = np.zeros(len(token_lists), dtype=np.int64)  # largo real de cada comentario
-    for i, toks in enumerate(token_lists):  # recorre cada comentario
-        seq = [vocab.get(t, UNK) for t in toks][:max_len] or [UNK]  # palabra -> id (o <unk> si no está), recorta a max_len; si quedó vacío usa [<unk>]
-        ids[i, :len(seq)] = seq  # escribe los ids al inicio de la fila (el resto sigue en 0)
-        lengths[i] = len(seq)  # guarda el largo real (nunca 0)
-    return torch.from_numpy(ids), torch.from_numpy(lengths)  # convierte a tensores de torch
+    ids = np.zeros((len(token_lists), max_len), dtype=np.int64)
+    lengths = np.zeros(len(token_lists), dtype=np.int64)
+    for i, toks in enumerate(token_lists):
+        seq = [vocab.get(t, UNK) for t in toks][:max_len] or [UNK]   # vacío -> <unk>
+        ids[i, :len(seq)] = seq
+        lengths[i] = len(seq)
+    return torch.from_numpy(ids), torch.from_numpy(lengths)
 
 
-def _subset(lst, idx):  # selecciona elementos de una lista según posiciones
-    return [lst[i] for i in idx]  # lista nueva solo con las posiciones pedidas
+def _subset(lst, idx):
+    return [lst[i] for i in idx]
 
 
 # ----------------------------------------------------------------- entrenamiento
-@torch.no_grad()  # en predicción no se calculan gradientes (más rápido, menos memoria)
-def predict_proba(model, X, L):  # devuelve la probabilidad de clase positiva
-    model.eval()  # modo evaluación: apaga el dropout
-    return torch.sigmoid(model(X, L)).numpy()  # logit -> probabilidad (0 a 1) -> arreglo numpy
+@torch.no_grad()
+def predict_proba(model, X, L):
+    model.eval()
+    return torch.sigmoid(model(X, L)).numpy()
 
 
 def train_model(model, Xtr, Ltr, ytr, Xva, Lva, yva, lr, batch_size,
-                max_epochs=30, patience=5, seed=SEED):  # entrena un modelo ya construido
+                max_epochs=30, patience=5, seed=SEED):
     """Adam + BCEWithLogits + clipping de gradiente + early stopping sobre val loss.
 
     Devuelve el modelo con los mejores pesos y el historial por época.
     """
-    g = torch.Generator().manual_seed(seed)  # generador propio para barajar los lotes de forma reproducible
+    g = torch.Generator().manual_seed(seed)
     loader = DataLoader(TensorDataset(Xtr, Ltr, ytr), batch_size=batch_size,
-                        shuffle=True, generator=g)  # reparte train en lotes y los baraja cada época
-    opt = torch.optim.Adam(model.parameters(), lr=lr)  # optimizador Adam con la tasa de aprendizaje dada
-    loss_fn = nn.BCEWithLogitsLoss()  # pérdida binaria: aplica la sigmoide internamente sobre el logit
+                        shuffle=True, generator=g)
+    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    loss_fn = nn.BCEWithLogitsLoss()
 
-    best_loss, best_state, best_epoch, wait = float("inf"), None, 0, 0  # mejor pérdida de validación vista, sus pesos, su época y épocas sin mejorar
-    history = []  # aquí se guarda el resumen de cada época
-    for epoch in range(1, max_epochs + 1):  # repite hasta max_epochs épocas
-        model.train()  # modo entrenamiento: activa el dropout
-        tot, n = 0.0, 0  # acumuladores de pérdida total y de nº de ejemplos
-        for xb, lb, yb in loader:  # recorre un lote a la vez (ids, largos, etiquetas)
-            opt.zero_grad()  # borra los gradientes del lote anterior
-            loss = loss_fn(model(xb, lb), yb)  # predice y calcula la pérdida contra las etiquetas reales
-            loss.backward()  # backpropagation: calcula los gradientes
-            nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # limita la norma del gradiente a 1 (evita gradientes explosivos en RNN)
-            opt.step()  # actualiza los pesos
-            tot += loss.item() * len(yb)  # suma la pérdida ponderada por el tamaño del lote
-            n += len(yb)  # cuenta los ejemplos vistos
+    best_loss, best_state, best_epoch, wait = float("inf"), None, 0, 0
+    history = []
+    for epoch in range(1, max_epochs + 1):
+        model.train()
+        tot, n = 0.0, 0
+        for xb, lb, yb in loader:
+            opt.zero_grad()
+            loss = loss_fn(model(xb, lb), yb)
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            opt.step()
+            tot += loss.item() * len(yb)
+            n += len(yb)
 
-        model.eval()  # modo evaluación para medir en validación
-        with torch.no_grad():  # sin gradientes
-            logits = model(Xva, Lva)  # logits sobre todo el conjunto de validación
-            val_loss = loss_fn(logits, yva).item()  # pérdida de validación
-            val_acc = ((logits > 0).float() == yva).float().mean().item()  # accuracy: logit > 0 equivale a probabilidad > 0.5
+        model.eval()
+        with torch.no_grad():
+            logits = model(Xva, Lva)
+            val_loss = loss_fn(logits, yva).item()
+            val_acc = ((logits > 0).float() == yva).float().mean().item()
         history.append({"epoch": epoch, "train_loss": tot / n,
-                        "val_loss": val_loss, "val_acc": val_acc})  # guarda el resumen de la época
+                        "val_loss": val_loss, "val_acc": val_acc})
 
-        if val_loss < best_loss - 1e-4:  # ¿mejoró la validación de forma apreciable?
-            best_loss, best_epoch, wait = val_loss, epoch, 0  # sí: actualiza el mejor valor y reinicia el contador de espera
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}  # copia los pesos actuales como los mejores
-        else:  # no mejoró
-            wait += 1  # una época más sin mejorar
-            if wait >= patience:  # si se agotó la paciencia
-                break  # early stopping: se detiene el entrenamiento
+        if val_loss < best_loss - 1e-4:
+            best_loss, best_epoch, wait = val_loss, epoch, 0
+            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+        else:
+            wait += 1
+            if wait >= patience:
+                break
 
-    model.load_state_dict(best_state)  # restaura los mejores pesos (no los de la última época)
-    return model, history, best_epoch  # modelo, historial y época óptima
+    model.load_state_dict(best_state)
+    return model, history, best_epoch
 
 
 def fit_eval(model_name, tok_tr, y_tr, tok_va, y_va, params, seed=SEED,
-             max_epochs=30, patience=5):  # prepara datos, construye y entrena un modelo
+             max_epochs=30, patience=5):
     """Construye vocab con tok_tr, entrena con early stopping en (tok_va, y_va)."""
-    set_seed(seed)  # fija semillas antes de construir el modelo
-    vocab = build_vocab(tok_tr)  # vocabulario solo con los datos de entrenamiento
-    Xtr, Ltr = encode(tok_tr, vocab)  # entrenamiento -> ids y largos
-    Xva, Lva = encode(tok_va, vocab)  # validación -> ids y largos (palabras no vistas pasan a <unk>)
-    ytr = torch.tensor(y_tr, dtype=torch.float32)  # etiquetas de train como float (lo que pide BCEWithLogitsLoss)
-    yva = torch.tensor(y_va, dtype=torch.float32)  # etiquetas de validación como float
+    set_seed(seed)
+    vocab = build_vocab(tok_tr)
+    Xtr, Ltr = encode(tok_tr, vocab)
+    Xva, Lva = encode(tok_va, vocab)
+    ytr = torch.tensor(y_tr, dtype=torch.float32)
+    yva = torch.tensor(y_va, dtype=torch.float32)
 
-    model_kw = {k: params[k] for k in ("emb_dim", "hidden", "dropout") if k in params}  # separa los parámetros que son de la arquitectura
-    model = build_model(model_name, len(vocab), **model_kw)  # crea el modelo ('dense', 'vanilla_rnn', 'lstm' o 'bilstm')
+    model_kw = {k: params[k] for k in ("emb_dim", "hidden", "dropout") if k in params}
+    model = build_model(model_name, len(vocab), **model_kw)
     model, history, best_epoch = train_model(
         model, Xtr, Ltr, ytr, Xva, Lva, yva, lr=params["lr"],
         batch_size=params["batch_size"], max_epochs=max_epochs,
-        patience=patience, seed=seed)  # entrena con lr y batch size del grid
-    pred_va = (predict_proba(model, Xva, Lva) >= 0.5).astype(int)  # predicciones de validación: probabilidad >= 0.5 -> clase 1
+        patience=patience, seed=seed)
+    pred_va = (predict_proba(model, Xva, Lva) >= 0.5).astype(int)
     return {"model": model, "vocab": vocab, "history": history,
-            "best_epoch": best_epoch, "val_metrics": compute_metrics(y_va, pred_va)}  # todo lo necesario para analizar la corrida
+            "best_epoch": best_epoch, "val_metrics": compute_metrics(y_va, pred_va)}
 
 
 # ----------------------------------------------------------------- búsqueda de hiperparámetros
 def grid_search(model_name, tok_tr, y_tr, grid=GRID, fixed=FIXED, n_splits=3,
-                seed=SEED, max_epochs=30, patience=5):  # prueba todas las combinaciones del grid
+                seed=SEED, max_epochs=30, patience=5):
     """Grid manual con CV estratificada SOLO sobre train. Devuelve DataFrame ordenado por accuracy."""
-    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)  # divide train en 3 folds manteniendo 50/50 de clases
-    keys = list(grid)  # nombres de los hiperparámetros (hidden, batch_size, lr)
-    rows = []  # una fila de resultados por combinación
-    combos = list(product(*grid.values()))  # todas las combinaciones posibles de valores
-    log(f"[{model_name}] grid search: {len(combos)} configuraciones x {n_splits} folds")  # registra el tamaño de la búsqueda
-    for i, combo in enumerate(combos, 1):  # recorre cada combinación
-        params = {**fixed, **dict(zip(keys, combo))}  # une los parámetros fijos con los de esta combinación
-        accs, f1s, eps = [], [], []  # métricas por fold
-        t0 = time.time()  # inicio del cronómetro
-        for tr_idx, va_idx in skf.split(np.zeros(len(y_tr)), y_tr):  # recorre los 3 folds (índices de train y de validación)
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    keys = list(grid)
+    rows = []
+    combos = list(product(*grid.values()))
+    log(f"[{model_name}] grid search: {len(combos)} configuraciones x {n_splits} folds")
+    for i, combo in enumerate(combos, 1):
+        params = {**fixed, **dict(zip(keys, combo))}
+        accs, f1s, eps = [], [], []
+        t0 = time.time()
+        for tr_idx, va_idx in skf.split(np.zeros(len(y_tr)), y_tr):
             r = fit_eval(model_name, _subset(tok_tr, tr_idx), y_tr[tr_idx],
                          _subset(tok_tr, va_idx), y_tr[va_idx], params,
-                         seed=seed, max_epochs=max_epochs, patience=patience)  # entrena en 2 folds y valida en el tercero
-            accs.append(r["val_metrics"]["accuracy"])  # accuracy en el fold de validación
-            f1s.append(r["val_metrics"]["f1"])  # F1 en el fold de validación
-            eps.append(r["best_epoch"])  # época óptima de este fold
+                         seed=seed, max_epochs=max_epochs, patience=patience)
+            accs.append(r["val_metrics"]["accuracy"])
+            f1s.append(r["val_metrics"]["f1"])
+            eps.append(r["best_epoch"])
         row = {**dict(zip(keys, combo)), "val_acc": np.mean(accs),
                "val_acc_std": np.std(accs), "val_f1": np.mean(f1s),
-               "best_epoch": float(np.mean(eps))}  # promedios sobre los 3 folds
-        rows.append(row)  # guarda la fila
+               "best_epoch": float(np.mean(eps))}
+        rows.append(row)
         log(f"[{model_name}] {i}/{len(combos)} {dict(zip(keys, combo))} "
             f"val_acc={row['val_acc']:.4f} best_epoch={row['best_epoch']:.1f} "
-            f"({time.time() - t0:.1f}s)")  # registra el avance y el tiempo
-    return pd.DataFrame(rows).sort_values("val_acc", ascending=False).reset_index(drop=True)  # tabla ordenada: la mejor configuración queda en la fila 0
+            f"({time.time() - t0:.1f}s)")
+    return pd.DataFrame(rows).sort_values("val_acc", ascending=False).reset_index(drop=True)
 
 
 # ----------------------------------------------------------------- evaluación final
 def final_runs(model_name, tok_tr, y_tr, tok_te, y_te, params,
-               seeds=(777, 778, 779, 780, 781), val_size=0.15, save_name=None,
-               max_epochs=30, patience=5):  # entrenamiento final con varias semillas y evaluación en test
+               seeds=(77767, 77768, 77769, 77770, 77771), val_size=0.15, save_name=None,
+               max_epochs=30, patience=5):
     """Entrena con varias semillas, evalúa en test UNA vez por semilla y guarda el JSON.
 
     - Validación (para early stopping) = 15 % de train; el test nunca se usa para decidir nada.
@@ -219,49 +219,49 @@ def final_runs(model_name, tok_tr, y_tr, tok_te, y_te, params,
       `std`, `n_seeds`, `params`, `n_params`, `train_seconds`.
     - Guarda los pesos de la primera semilla en outputs/saved_models/<save_name>.pt
     """
-    save_name = save_name or model_name  # nombre del archivo de salida (por defecto, el del modelo)
-    all_metrics, cms, secs, results = [], [], [], []  # acumuladores: métricas, matrices de confusión, tiempos y resultados completos
-    for s in seeds:  # una corrida por semilla
+    save_name = save_name or model_name
+    all_metrics, cms, secs, results = [], [], [], []
+    for s in seeds:
         idx_tr, idx_va = train_test_split(np.arange(len(y_tr)), test_size=val_size,
-                                          stratify=y_tr, random_state=s)  # separa 15 % de train como validación para el early stopping
-        t0 = time.time()  # inicio del cronómetro
+                                          stratify=y_tr, random_state=s)
+        t0 = time.time()
         r = fit_eval(model_name, _subset(tok_tr, idx_tr), y_tr[idx_tr],
                      _subset(tok_tr, idx_va), y_tr[idx_va], params, seed=s,
-                     max_epochs=max_epochs, patience=patience)  # entrena con el 85 % restante
-        secs.append(time.time() - t0)  # guarda los segundos que tardó
+                     max_epochs=max_epochs, patience=patience)
+        secs.append(time.time() - t0)
 
-        Xte, Lte = encode(tok_te, r["vocab"])  # codifica el test con el vocabulario de train
-        proba = predict_proba(r["model"], Xte, Lte)  # probabilidades sobre test
-        pred = (proba >= 0.5).astype(int)  # clase predicha: 1 si probabilidad >= 0.5
-        m = compute_metrics(y_te, pred)  # accuracy, precision, recall, f1, kappa en test
-        all_metrics.append(m)  # guarda las métricas de esta semilla
-        cm = np.zeros((2, 2), dtype=int)  # matriz de confusión 2x2 vacía
-        for t, p in zip(y_te, pred):  # recorre real y predicho
-            cm[t, p] += 1  # fila = real, columna = predicho
-        cms.append(cm)  # guarda la matriz de esta semilla
-        r.update({"test_metrics": m, "proba": proba, "pred": pred, "seed": s})  # agrega datos de test al resultado
-        results.append(r)  # guarda el resultado completo (sirve para graficar curvas)
+        Xte, Lte = encode(tok_te, r["vocab"])
+        proba = predict_proba(r["model"], Xte, Lte)
+        pred = (proba >= 0.5).astype(int)
+        m = compute_metrics(y_te, pred)
+        all_metrics.append(m)
+        cm = np.zeros((2, 2), dtype=int)
+        for t, p in zip(y_te, pred):
+            cm[t, p] += 1
+        cms.append(cm)
+        r.update({"test_metrics": m, "proba": proba, "pred": pred, "seed": s})
+        results.append(r)
         log(f"[{save_name}] seed={s} best_epoch={r['best_epoch']} "
             f"test_acc={m['accuracy']:.4f} f1={m['f1']:.4f} kappa={m['kappa']:.4f} "
-            f"({secs[-1]:.1f}s)")  # registra el resultado de la semilla
+            f"({secs[-1]:.1f}s)")
 
-    keys = ["accuracy", "precision", "recall", "f1", "kappa"]  # las 5 métricas del enunciado
-    mean = {k: float(np.mean([m[k] for m in all_metrics])) for k in keys}  # media de cada métrica entre semillas
-    std = {k: float(np.std([m[k] for m in all_metrics])) for k in keys}  # desviación estándar entre semillas
+    keys = ["accuracy", "precision", "recall", "f1", "kappa"]
+    mean = {k: float(np.mean([m[k] for m in all_metrics])) for k in keys}
+    std = {k: float(np.std([m[k] for m in all_metrics])) for k in keys}
 
-    out = {"model": save_name, **{k: round(v, 4) for k, v in mean.items()},  # nombre y métricas medias a 4 decimales (formato del equipo)
-           "confusion_matrix": np.mean(cms, axis=0).round(1).tolist(),  # matriz de confusión promedio
-           "std": {k: round(v, 4) for k, v in std.items()},  # desviaciones
-           "n_seeds": len(seeds), "params": params,  # nº de semillas e hiperparámetros usados
-           "n_params": count_params(results[0]["model"]),  # nº de parámetros entrenables (complejidad)
-           "train_seconds_per_run": round(float(np.mean(secs)), 1)}  # segundos promedio por corrida
-    METRICS_DIR.mkdir(parents=True, exist_ok=True)  # crea outputs/metrics si no existe
-    (METRICS_DIR / f"{save_name}.json").write_text(json.dumps(out, indent=2))  # escribe el JSON de métricas
+    out = {"model": save_name, **{k: round(v, 4) for k, v in mean.items()},
+           "confusion_matrix": np.mean(cms, axis=0).round(1).tolist(),
+           "std": {k: round(v, 4) for k, v in std.items()},
+           "n_seeds": len(seeds), "params": params,
+           "n_params": count_params(results[0]["model"]),
+           "train_seconds_per_run": round(float(np.mean(secs)), 1)}
+    METRICS_DIR.mkdir(parents=True, exist_ok=True)
+    (METRICS_DIR / f"{save_name}.json").write_text(json.dumps(out, indent=2))
 
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)  # crea outputs/saved_models si no existe
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
     torch.save({"state_dict": results[0]["model"].state_dict(),
                 "vocab": results[0]["vocab"], "params": params},
-               MODELS_DIR / f"{save_name}.pt")  # guarda pesos, vocabulario e hiperparámetros de la primera semilla
+               MODELS_DIR / f"{save_name}.pt")
     log(f"[{save_name}] MEDIA {len(seeds)} semillas: "
-        + " ".join(f"{k}={mean[k]:.4f}±{std[k]:.4f}" for k in keys))  # registra el resumen final
-    return out, results  # resumen (para tablas) y resultados completos (para figuras)
+        + " ".join(f"{k}={mean[k]:.4f}±{std[k]:.4f}" for k in keys))
+    return out, results

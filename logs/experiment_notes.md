@@ -4,15 +4,16 @@
 
 **Notebook:** `notebooks/02_baseline_model.ipynb`
 **Datos:** `data/processed/train.csv` (800) y `test.csv` (200), generados en `01_eda.ipynb`. Sin re-split ni re-preprocesamiento.
-**Semilla:** 42
+**Semilla oficial:** 42
 
 ### Parámetros
 - Modelo: `sklearn.dummy.DummyClassifier`
 - Estrategias probadas: `most_frequent`, `prior`, `stratified`, `uniform` (`random_state=42`)
 - Entrada: columna `clean`, ignorada por el modelo
 - Etiqueta: `label` (1 = positivo, 0 = negativo)
+- Evaluación: sobre test y sobre train, con `compute_metrics` de `src/evaluate.py`
 
-### Resultados (test, 200 comentarios)
+### Resultados en test (200 comentarios, semilla 42)
 | Estrategia | Accuracy | Precision | Recall | F1 | Kappa |
 |---|---|---|---|---|---|
 | most_frequent | 0.50 | 0.00 | 0.00 | 0.000 | 0.00 |
@@ -20,16 +21,37 @@
 | stratified | 0.50 | 0.50 | 0.51 | 0.505 | 0.00 |
 | uniform | 0.48 | 0.48 | 0.48 | 0.480 | -0.04 |
 
+### Resultados en train (800 comentarios, semilla 42)
+| Estrategia | Accuracy | Precision | Recall | F1 | Kappa |
+|---|---|---|---|---|---|
+| most_frequent | 0.50 | 0.00 | 0.00 | 0.000 | 0.00 |
+| prior | 0.50 | 0.00 | 0.00 | 0.000 | 0.00 |
+| stratified | 0.475 | 0.474 | 0.465 | 0.470 | -0.05 |
+| uniform | 0.515 | 0.514 | 0.532 | 0.523 | 0.03 |
+
+### Variabilidad entre semillas (stratified, 20 semillas)
+| Split | Accuracy | F1 | Kappa |
+|---|---|---|---|
+| test | 0.486 ± 0.031 | 0.486 ± 0.029 | -0.028 ± 0.062 |
+| train | 0.492 ± 0.017 | 0.495 ± 0.017 | -0.017 ± 0.034 |
+
+Rango de la accuracy en test según la semilla: 0.435 a 0.580.
+
 ### Decisiones
-- Baseline oficial: `stratified`. Las otras estrategias dan métricas degeneradas o casi idénticas.
-- Se usan las mismas funciones de `src/evaluate.py` (`compute_metrics`, `save_metrics`) para que todos los modelos guarden el mismo formato JSON en `outputs/metrics/`.
+- **Baseline oficial:** `stratified` con semilla 42. Las otras estrategias dan métricas degeneradas (`most_frequent`, `prior`) o casi idénticas (`uniform`).
+- **Aclaración sobre la semilla:** el F1 de 0.505 en test sale de una sola semilla sobre 200 comentarios. Promediando 20 semillas queda en 0.486 ± 0.029. Se conserva la semilla 42 por reproducibilidad (es la misma del resto del proyecto), pero la referencia más fiable es el promedio.
+- **Train y test:** se evalúan ambos conjuntos para tener la misma comparación que se hará con los modelos neuronales.
+- Se usan `compute_metrics` y `save_metrics` de `src/evaluate.py`, para que todos los modelos guarden el mismo formato JSON en `outputs/metrics/`.
 
 ### Observaciones
-- Con empate entre clases, `most_frequent` y `prior` eligen la clase 0 (negativo) y predicen siempre negativo.
-- El azar da ~50% de accuracy y kappa ≈ 0, que es el piso para comparar los demás modelos.
+- Con empate entre clases, `most_frequent` y `prior` eligen la clase 0 (negativo) y predicen siempre negativo: acierta los 100 negativos y falla los 100 positivos. Por eso su accuracy es 0.50 pero precision, recall y F1 son 0.
+- El azar da ~50% de accuracy y kappa ≈ 0 tanto en train como en test. El baseline no aprende del texto, así que no puede sobreajustarse y no hay brecha entre train y test.
+- Criterio para los modelos siguientes: superar con claridad ~0.49 de accuracy (el promedio de semillas) más su variación, es decir, llegar a ~0.55 o más en test.
 
 ### Archivos generados
-- `outputs/metrics/baseline_dummy.json`
+- `outputs/metrics/baseline_dummy.json` (test, formato común)
+- `outputs/metrics/baseline_dummy_train.json` (train)
+- `outputs/metrics/baseline_seeds.csv` (resumen de 20 semillas)
 - `outputs/figures/baseline_confusion_<estrategia>.png` (4 figuras)
 
 ## Modelos neuronales (Dense, RNN vanilla, LSTM y BiLSTM)

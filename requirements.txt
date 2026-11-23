@@ -12,3 +12,17 @@ transformers>=4.30.0
 datasets>=2.12.0
 accelerate>=0.20.0
 wordcloud>=1.9.2
+# Análisis de datos y visualización
+numpy
+pandas
+matplotlib
+seaborn
+
+# Modelado y notebooks
+scikit-learn
+jupyter
+torch
+
+# Extensión opcional con Transformers
+transformers
+datasets
