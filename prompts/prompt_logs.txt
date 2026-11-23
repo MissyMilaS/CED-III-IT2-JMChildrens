@@ -6,7 +6,7 @@ Estudiante: Nicholas Solís Pinilla (NSP2007)
 
 [2026-11-22 17:15:10] SESIÓN 1: DIAGNÓSTICO Y PLANIFICACIÓN DE LA TAREA 4
 Prompt:
-"tenemos esta tarea integradora que hacer en el .pdf y a mi me correspondes hacer el ultimo modelo de Transformers, lo quiero hacer basado en el archivo .ipynb que nos mando el profe en clase. Por favor, antes de empezar, actua como un profesor ultra amable y comprensivo que explica todo, y haz un documento de resumen de la estructura del repositorio que tenemos, y que es todo lo correspondiente a la tarea 4 que debo entregar..."
+"tenemos esta tarea integradora que hacer en el .pdf y a mi me correspondes hacer el ultimo modelo de Transformers, lo quiero hacer basado en el archivo .ipynb que nos mando el profe en clase. Por favor, antes de empezar, actua como un profesor ultra amable y comprensivo que explica todo, y haz un documento de resumen de la estructura del repositorio que tenemos, y que es todo lo correspondiente a la tarea 4 que debo entregar, me gustaria entender como hacer el paso a paso"
 
 Respuesta / Decisión técnica:
 - Generación del documento maestro CONTEXTO_TAREA4_TRANSFORMERS.md con análisis de la estructura del repo, hiperparámetros de DistilBERT (WordPiece, uncased, 6 capas, 12 cabezas, d=768) y rúbrica oficial.
@@ -36,7 +36,7 @@ Respuesta / Decisión técnica:
 
 [2026-11-22 20:13:36] SESIÓN 2 (CONT.): PREPARACIÓN DEL COMMIT #4
 Prompt:
-"si por favor, trata de darme cosas para commitear"
+"si por favor, continua con la explicacion"
 
 Respuesta / Decisión técnica:
 - Sincronización de métricas en outputs/metrics/comparison.csv.
@@ -47,7 +47,7 @@ Respuesta / Decisión técnica:
 
 [2026-11-22 20:19:21] SESIÓN 2 (CONT.): MODULARIZACIÓN EN SRC/ Y REGLA DE EXCLUSIÓN DE DOCS
 Prompt:
-"siguiente paso por favor, no incluyas nada del informe ni diapositivas, el IAGEN_Inter ya lo commitiaste?"
+"siguiente paso por favor, no incluyas nada del informe ni diapositivas, eso lo hacemos luego"
 
 Respuesta / Decisión técnica:
 - Exclusión total de documentos de texto/diapositivas para enfocarse en componentes de código y reproducibilidad.
