@@ -22,3 +22,24 @@ generativa utilizadas en la actividad.
 - Creación de la estructura del cuaderno `04_transformer_extension.ipynb` adaptando los conceptos pedagógicos de `Transformers_DistilBERT_TweetEval.ipynb` a GoEmotions.
 - Análisis conceptual de la relación entre Auto-Atención ($Q, K, V$) y Máquinas de Turing (cinta de memoria de acceso directo vs estados ocultos acotados en autómatas recurrentes).
 - Elaboración de la guía de entrega `CONTEXTO_TAREA4_TRANSFORMERS.md`.
+
+---
+
+## Sesión 22-11-2026 (Noche): Auditoría de Git, Sincronización de Métricas y Modularización en `src/`
+
+**Estudiante:** Nicholas Solís Pinilla (`NSP2007`)  
+**Herramienta:** Asistente Inteligente Antigravity (DeepMind)  
+**Nivel de uso:** Nivel 3 - Colaboración con IAG (con supervisión crítica y comprensión teórica).  
+
+### Prompts Utilizados
+3. *"Hola, por favor lee todo el repositorio, el pdf de la integradora, el contexto y el archivo .ipynb de guia y confirmame si entiendes como seguir con lo que falta, tambien mira mis commits y las ramas del repo en git para saber si hay cambios que tener en cuenta antes de montar algo"*
+4. *"si por favor, trata de darme cosas para commitear"*
+5. *"siguiente paso por favor, no incluyas nada del informe ni diapositivas, el IAGEN_Inter ya lo commitiaste?"*
+
+### Trabajo Realizado y Comprensión Conceptual
+- Auditoría profunda de las ramas remotas de Git (`origin/dev`, `origin/feat_neuralModels`, `origin/feat_docs`), detectando la divergencia de métricas finales promediadas sobre 5 semillas para los modelos neuronales (Dense, Vanilla RNN, LSTM, BiLSTM).
+- Sincronización rigurosa de `outputs/metrics/comparison.csv` y generación de la figura `outputs/figures/all_models_metrics_comparison.png` a 200 DPI con nombres y etiquetas académicas.
+- Modularización de la arquitectura Transformer en `src/models.py` (`load_transformer_model`, `get_transformer_tokenizer`) para dar cumplimiento estricto a la estructura de entregables de la rúbrica.
+- Integración de `compute_transformer_metrics` en `src/evaluate.py` compatible con el ciclo de evaluación del `Trainer` de Hugging Face.
+- Corrección de sintaxis y robustez de rutas en `notebooks/04_transformer_extension.ipynb`.
+
