@@ -10,13 +10,13 @@ Transformers.
 ## Integrantes
 
 <<<<<<< HEAD
-Maria Camima Salamanca A00411232, Nicholas Solís A00411205, Sarah Rodriguez A00411438, Santiago Cabal A0041...., Heidy Yuliana Hernandez Huila A00411232
+Maria Camima Salamanca A00411232, Nicholas Solís A00411205, Sarah Rodriguez A00411438, Santiago Cabal A00412508, Heidy Yuliana Hernandez Huila A00411232
 
 =======
 Sarah Rodriguez A00411232
 Maria Camila Salamanca A00411234
-Nicholas Solis A0041--05
-Santiago Cabal A00
+Nicholas Solis A00411205
+Santiago Cabal A00412508
 Heidy Hernandez A00411232
 >>>>>>> feat_docs
 ## Requisitos e instrucciones
